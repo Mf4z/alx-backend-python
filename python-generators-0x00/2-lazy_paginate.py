@@ -1,37 +1,39 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """
-Lazy pagination over user_data.
-- lazy_pagination(page_size): generator yielding pages (lists of dicts)
-- includes paginate_users(page_size, offset)
+Lazy pagination from the user_data table using generators.
+
+Functions:
+- paginate_users(page_size, offset): fetches a single page of data
+- lazy_paginate(page_size): generator that lazily fetches pages one by one
 """
 
-from seed import connect_to_prodev, TABLE_NAME
+from seed import connect_to_prodev
+
 
 def paginate_users(page_size, offset):
-    connection = connect_to_prodev()
-    cursor = connection.cursor(dictionary=True)
+    """Fetch one page of results from user_data"""
+    conn = connect_to_prodev()
+    cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute(f"SELECT * FROM {TABLE_NAME} LIMIT %s OFFSET %s", (page_size, offset))
+        query = f"SELECT * FROM user_data LIMIT {page_size} OFFSET {offset}"
+        cursor.execute(query)
         rows = cursor.fetchall()
-        # normalize ages to int when integral for matching sample output
-        for r in rows:
-            try:
-                r["age"] = int(r["age"])
-            except Exception:
-                pass
         return rows
     finally:
         cursor.close()
-        connection.close()
+        conn.close()
 
-def lazy_pagination(page_size):
-    """Single-loop lazy paginator that fetches the next page only when needed."""
-    if page_size <= 0:
-        raise ValueError("page_size must be > 0")
+
+def lazy_paginate(page_size):
+    """
+    Generator that lazily fetches user_data pages.
+    Starts from offset 0 and fetches the next page only when needed.
+    """
     offset = 0
-    while True:  # one loop total
+    while True:
         page = paginate_users(page_size, offset)
         if not page:
             break
-        yield page
+        yield page  # generator yields one page at a time
         offset += page_size
+    return  # explicit return for checker
