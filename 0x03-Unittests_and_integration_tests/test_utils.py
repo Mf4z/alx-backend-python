@@ -72,6 +72,37 @@ class TestMemoize(unittest.TestCase):
                 """Return cached value of a_method."""
                 return self.a_method()
 
+        with patch.object(
+            TestClass,
+            "a_method",
+            return_value=42,
+        ) as mock_method:
+            obj = TestClass()
+
+            # First access calls a_method
+            self.assertEqual(obj.a_property, 42)
+            # Second access should use cached value, not call a_method again
+            self.assertEqual(obj.a_property, 42)
+
+            mock_method.assert_called_once()
+
+    """Tests for memoize decorator."""
+
+    def test_memoize(self):
+        """Test that memoize caches the result of a method."""
+
+        class TestClass:
+            """Simple class for testing memoize."""
+
+            def a_method(self):
+                """Return a constant used for memoize test."""
+                return 42
+
+            @memoize
+            def a_property(self):
+                """Return cached value of a_method."""
+                return self.a_method()
+
         with patch.object(TestClass, "a_method", return_value=42) as mock_method:
             obj = TestClass()
 
