@@ -1,5 +1,5 @@
 INSTALLED_APPS = [
-    # Django default apps...
+    # Django default apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -10,8 +10,9 @@ INSTALLED_APPS = [
     # Third-party
     'rest_framework',
 
-    # Local
-    'chats',
+    # Local apps
+    'chats.apps.ChatsConfig',
+
 ]
 
 AUTH_USER_MODEL = 'chats.User'
